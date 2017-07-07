@@ -1,0 +1,47 @@
+//- Get lang from content object, or set default to "es" (Español)
+- var lang = siteinfo.lang || "es";
+html(lang=lang)
+  head
+    //- Required meta tags (best practices)
+    meta(crset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+
+    //- HEAD = the rest of the head tags
+    block head(class={home: this.home === true })
+      
+      //- Title and description
+      title #{siteinfo.title}
+      meta(name="description" content=siteinfo.description)
+
+      //- Touch and mobile-related meta tags (Best practices)
+      block touch
+        //- Load data in variables
+        - var app = siteinfo.app;
+
+        //- Disable tap highlight on IE
+        meta(name="msapplication-tap-highlight" content="no")
+
+        //- Web Application Manifest
+        link(rel="manifest" href="manifest.json")
+
+        //- Add to homescreen for Chrome on Android
+        meta(name="mobile-web-app-capable" content="yes")
+        meta(name="application-name" content=app.name)
+        link(rel="icon" sizes="192x192" href=app.icon.chrome)
+
+        //-Add to homescreen for Safari on iOS
+        meta(name="apple-mobile-web-app-capable" content="yes")
+        meta(name="apple-mobile-web-app-status-bar-style" content=app.color.ios)
+        meta(name="apple-mobile-web-app-title" content=app.name)
+        link(rel="apple-touch-icon" href=app.icon.safari)
+
+        //- Tile icon for Win8 (144x144 + tile color)
+        meta(name="msapplication-TileImage" content=app.icon.win8)
+        meta(name="msapplication-TileColor" content=app.color.win8)
+
+        //- Color the status bar on mobile devices
+        meta(name="theme-color" content=app.color.main)
+  body(class={home: this.home === true })
+    block body
+    script
+      include google-analytics.js

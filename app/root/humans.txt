@@ -1,0 +1,17 @@
+/* TEAM */
+
+  Awesome Brother: Mathias San Miguel
+  Site: mathiassm.github.io
+  Twitter: @mathiassm
+  From: Caracas, Venezuela
+  
+/* THANKS */
+
+  Domain Name (1st Year): CodeChef's SnackDown 2017 Prize
+  Hosting (Starting): Github Pages
+
+/* SITE */
+
+  Language: English, Español
+  Doctype: HTML5
+  UI: React.js
