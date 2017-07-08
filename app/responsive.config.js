@@ -34,12 +34,13 @@ module.exports = [
   },
   // [1]: Global Configs for gulp-responsive
   {
-    silent:             true,   // Silent per-image output? 
+    silent:             false,  // Silent per-image output? 
     stats:              false,  // Print summary of everything processed?
     withMetadata:       false,  // Include metadata? 
     errorOnEnlargement: false,  // Stop on image too small for given sizes?
-    withoutEnlargement: true,   // Prevent enlarging images to fit sizes?
+    skipOnEnlargement:   true,  // Prevent resizing up?
     errorOnUnusedImage: false,  // Stop on image not grabbed by glob (like svg)?
-    passThroughUnused:  true    // Pass unused images through the pipe?
+    passThroughUnused:   true,  // Pass unused images through the pipe?
+    errorOnUnusedConfig:false   // Error if no image matches?
   }
 ]

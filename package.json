@@ -34,7 +34,8 @@
     "sw-precache": "^3.2.0",
     "sw-toolbox": "^3.2.1",
     "gulp-pug": "^3.3.0",
-    "gulp-rename": "^1.2.2"
+    "gulp-rename": "^1.2.2",
+    "gulp-real-favicon": "^0.2.2"
   },
   "engines": {
     "node": ">=4"
@@ -45,12 +46,12 @@
     "build:production": "gulp production",
     "build:development": "gulp development",
     "start": "npm run server",
-    "server": "gulp serve",
+    "server": "gulp serve"
   },
   "eslintConfig": {
     "extends": "google"
   },
   "license": "Apache-2.0",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "name": "pugle-web-starter"
 }

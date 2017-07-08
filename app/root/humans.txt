@@ -1,6 +1,6 @@
 /* TEAM */
 
-  Awesome Brother: Mathias San Miguel
+  WebStarter: Mathias San Miguel
   Site: mathiassm.github.io
   Twitter: @mathiassm
   From: Caracas, Venezuela

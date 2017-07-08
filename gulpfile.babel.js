@@ -15,7 +15,9 @@ import swPrecache from 'sw-precache';            // Service-Worker precaching
 import {output as pagespeed} from 'psi';         // Pagespeed Insights
 
 import gulpLoadPlugins from 'gulp-load-plugins'; // Easy loading of plugins
-const $ = gulpLoadPlugins();               
+const $ = gulpLoadPlugins();   
+
+var production = true;  // Enable favicon generation (requires internet)          
 // =============================================================================
 
 
@@ -128,6 +130,8 @@ gulp.task('scripts', () =>
 gulp.task('html', () => {
   let siteinfo = require('./app/siteinfo.json');
   let htmlminConfig = require('./app/htmlmin.config.js');
+  let faviconConfig = {};
+  if(production)faviconConfig = require('./dist/favicon.json').favicon;
   gulp.src([                    // SRC: Every Pug file not in root or templates
     'app/**/*.pug',             
     '!app/root/**',
@@ -158,11 +162,38 @@ gulp.task('html', () => {
     searchPath: '{.tmp,app}',
     noAssets: true
   }))
+  .pipe($.if(production,          // PIPE: Inject favicon markups in production
+    $.realFavicon             
+    .injectFaviconMarkups(
+      faviconConfig.html_code)))
   .pipe($.htmlmin(htmlminConfig)) // PIPE: Minify HTML
   .pipe($.size({                  // PIPE: Report size for each file
     title: 'html', 
     showFiles: true}))
   .pipe(gulp.dest('dist'))        // PIPE: Write files to 'dist'
+});
+
+
+// =============================================================================
+// TASK: favicon
+// DESC: Generates favicon data file.
+// =============================================================================
+gulp.task('favicon', (done) => {
+  $.realFavicon.generateFavicon(
+    require('./app/real-favicon.config.js'), 
+    () => done() );
+});
+
+
+// =============================================================================
+// TASK: favicon-update
+// DESC: Checks for favicon guidelines updates.
+// =============================================================================
+gulp.task('favicon-update', ['favicon'], (done) =>{
+  let curVer = require('./dist/favicon.json').version;
+  $.realFavicon.checkForUpdates(curVer, (err) => {
+    if(err) throw err;
+  });
 });
 
 
@@ -208,28 +239,31 @@ gulp.task('serve', ['development'], () => {
 // TASK: production
 // DESC: Build production site
 // =============================================================================
-gulp.task('production', ['clean'], cb =>
+gulp.task('production', ['clean'], cb => {
+  production=true;
   runSequence(
+    'favicon',
     'styles',
     ['lint', 'html', 'scripts', 'images', 'copy'],
     'generate-service-worker',
     cb
-  )
-);
+  );
+});
 
 
 // =============================================================================
 // TASK: development
 // DESC: Build development site (no sw)
 // =============================================================================
-gulp.task('development', ['clean'], cb =>
+gulp.task('development', ['clean'], cb => {
+  production=false;
   runSequence(
     'styles',
     ['lint', 'html', 'scripts', 'images', 'copy'],
     // In development, loading the SW might cause caching headaches
     cb
-  )
-);
+  );
+});
 
 
 // =============================================================================
