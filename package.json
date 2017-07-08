@@ -40,7 +40,6 @@
   "engines": {
     "node": ">=4"
   },
-  "private": true,
   "scripts": {
     "build": "gulp",
     "build:production": "gulp production",
