@@ -1,4 +1,6 @@
-# [![Pugle Web Starter](https://cloud.githubusercontent.com/assets/110953/11445049/f05512ba-9520-11e5-8fdb-8c8eb5f690d0.jpg)](https://github.com/google/web-starter-kit/releases/latest)
+# [Pugle Web Starter](https://github.com/MathiasSM/Pugle-Web-Starter/releases/latest)
+
+![https://api.travis-ci.org/MathiasSM/Pugle-Web-Starter.svg?branch=master](Travis build)
 
 ## Overview
 
