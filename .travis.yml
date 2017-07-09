@@ -12,7 +12,7 @@ addons:
     packages:
     - g++-4.8
 # deploy:
-#   local_dir: $PUBLICFOLDER
+#   local_dir: 'dist'
 #   provider: pages
 #   skip_cleanup: true
 #   github_token: $GITHUB_TOKEN
