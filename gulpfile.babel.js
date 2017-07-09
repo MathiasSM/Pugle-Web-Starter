@@ -8,10 +8,12 @@ import gulp from 'gulp';                         // Gulp (This is a Gulpfile!)
 import fs from 'fs';                             // Filesystem utilities
 import del from 'del';                           // Delete File with globbing
 import path from 'path';                         // Path-related tools
+import glob from 'glob';                         // Globbing
+import replace from 'replace';                   // Search-and-replace on files
 
 import runSequence from 'run-sequence';          // Run sequences of tasks
 import browserSync from 'browser-sync';          // Sync browsers in development
-import swPrecache from 'sw-precache';            // Service-Worker precaching
+import workboxBuild from 'workbox-build';        // Service-Worker tools
 import {output as pagespeed} from 'psi';         // Pagespeed Insights
 
 import gulpLoadPlugins from 'gulp-load-plugins'; // Easy loading of plugins
@@ -105,7 +107,7 @@ gulp.task('styles', () =>
 // =============================================================================
 gulp.task('scripts', () =>
   gulp.src([                          // SRC: Every client-side JS (must edit!)            
-    './app/scripts/main.js'                   // Google's Service-Worker tool
+    'app/scripts/main.js'                   // Google's Service-Worker tool
     // Your JS files here
   ],{nodir: true })
   .pipe($.newer('.tmp/scripts'))      // PIPE: Turn on 'scripts' cache
@@ -114,8 +116,8 @@ gulp.task('scripts', () =>
     .pipe($.sourcemaps.write())       // PIPE: Write current sourcemap
     .pipe(gulp.dest('.tmp/scripts'))  // PIPE: Copy to cache
     .pipe($.concat('main.min.js'))    // PIPE: Concat all to single file
-    .pipe($.uglify(                   // PIPE: Minify single file
-      {preserveComments: 'some'}))
+    .pipe($.uglify({                  // PIPE: Minify JS file
+      output:{comments:false}}))
     .pipe($.size({title: 'scripts'})) // PIPE: Report file size
   .pipe($.sourcemaps.write('.'))      // PIPE: Write new sourcemap
   .pipe(gulp.dest('dist/scripts'))    // PIPE: Write to 'dist'
@@ -130,9 +132,8 @@ gulp.task('scripts', () =>
 gulp.task('html', () => {
   let siteinfo = require('./app/siteinfo.json');
   let htmlminConfig = require('./app/htmlmin.config.js');
-  let faviconConfig = {};
-  if(production)faviconConfig = require('./dist/favicon.json').favicon;
-  gulp.src([                    // SRC: Every Pug file not in root or templates
+  let favicons = production ? fs.readFileSync('./.tmp/favicon.html') : "";
+  return gulp.src([               // SRC: Every Pug file not in root or templates
     'app/**/*.pug',             
     '!app/root/**',
     '!app/templates/**'
@@ -162,10 +163,18 @@ gulp.task('html', () => {
     searchPath: '{.tmp,app}',
     noAssets: true
   }))
-  .pipe($.if(production,          // PIPE: Inject favicon markups in production
-    $.realFavicon             
-    .injectFaviconMarkups(
-      faviconConfig.html_code)))
+  .pipe($.insert                  // PIPE: Insert favicon-related meta tags
+    .transform((contents, file) =>
+      contents.replace(
+        /<\/head>/,
+        favicons+"</head>")
+  ))
+  .pipe($.save('html'))             // PIPE: Save Pipe for later use
+    .pipe($.sitemap({                 // PIPE: Generate sitemap
+      siteUrl: 'https://example.com'
+    }))   
+    .pipe(gulp.dest('./dist'))      // PIPE: Save sitemap to 'dist'
+  .pipe($.save.restore('html'))     // PIPE: Restore old Pipe
   .pipe($.htmlmin(htmlminConfig)) // PIPE: Minify HTML
   .pipe($.size({                  // PIPE: Report size for each file
     title: 'html', 
@@ -176,24 +185,38 @@ gulp.task('html', () => {
 
 // =============================================================================
 // TASK: favicon
-// DESC: Generates favicon data file.
+// DESC: Generates favicons.
 // =============================================================================
-gulp.task('favicon', (done) => {
-  $.realFavicon.generateFavicon(
-    require('./app/real-favicon.config.js'), 
-    () => done() );
-});
-
-
-// =============================================================================
-// TASK: favicon-update
-// DESC: Checks for favicon guidelines updates.
-// =============================================================================
-gulp.task('favicon-update', ['favicon'], (done) =>{
-  let curVer = require('./dist/favicon.json').version;
-  $.realFavicon.checkForUpdates(curVer, (err) => {
-    if(err) throw err;
-  });
+gulp.task('favicon', () => {
+  return gulp.src("app/favicon.png")          // SRC: Source favicon image
+  .pipe($.favicons({                          // PIPE: Generate Favicons
+    appName: "My App",
+    appDescription: "This is my application",
+    developerName: "Jane Dow",
+    developerURL: "https://example.com/",
+    background: "#ffffff",
+    theme_color: "#247cbf",
+    lang: "en-US",
+    path: "/",
+    url: "https://example.com/",
+    display: "standalone",
+    orientation: "portrait",
+    start_url: "/",
+    version: 1.0,
+    html: '../.tmp/favicon.html',
+    logging: false,
+    online: false,
+    pipeHTML: true,
+    replace: true,
+    logging:false,
+    icons: {
+      appleStartup: { offset:25},
+      appleIcon: { offset:10},
+      android: { shadow: true}
+    }
+  }))
+  .pipe(gulp.dest("dist"))                    // PIPE: Save to 'dist'
+  .pipe($.size({title: 'favicons'}));          // PIPE: Report file size
 });
 
 
@@ -208,7 +231,7 @@ gulp.task('clean', () => del(['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 // TASK: serve
 // DESC: Run server and reload on file changes
 // =============================================================================
-gulp.task('serve', ['development'], () => {
+gulp.task('serve', ['build:dev'], () => {
   browserSync({                  // BROWSERSYNC: Serve files, sync browsers
     notify: false,                    // Pop-up to let user know?
     logPrefix: 'BrowserSync',         // Console-logging prefix
@@ -236,37 +259,6 @@ gulp.task('serve', ['development'], () => {
 
 
 // =============================================================================
-// TASK: production
-// DESC: Build production site
-// =============================================================================
-gulp.task('production', ['clean'], cb => {
-  production=true;
-  runSequence(
-    'favicon',
-    'styles',
-    ['lint', 'html', 'scripts', 'images', 'copy'],
-    'generate-service-worker',
-    cb
-  );
-});
-
-
-// =============================================================================
-// TASK: development
-// DESC: Build development site (no sw)
-// =============================================================================
-gulp.task('development', ['clean'], cb => {
-  production=false;
-  runSequence(
-    'styles',
-    ['lint', 'html', 'scripts', 'images', 'copy'],
-    // In development, loading the SW might cause caching headaches
-    cb
-  );
-});
-
-
-// =============================================================================
 // TASK: pagespeed
 // DESC: Get Page Speed Insights from Google
 // =============================================================================
@@ -282,51 +274,99 @@ gulp.task('pagespeed', cb => {
 
 
 // =============================================================================
-// TASK: copy-sw-scripts
-// DESC: Copy over the scripts that are used in importScripts 
-//        as part of the `generate-service-worker` task.
+// TASK: serviceworker :dev :prod
+// DESC: Copy over the scripts 
 // =============================================================================
-gulp.task('copy-sw-scripts', () => {
-  return gulp.src([                           // SRC: Module's and kit's tools.
-    'node_modules/sw-toolbox/sw-toolbox.js',
-    'app/scripts/sw/runtime-caching.js'
+gulp.task('copy-sw:dev', () => 
+  gulp.src([
+    'node_modules/workbox-sw/build/importScripts/workbox-sw.dev.*.js'
   ])
-  .pipe(gulp.dest('dist/scripts/sw'));        // PIPE: Write SW script to 'dist'
-});
+  .pipe($.rename('workbox-sw.dev.js'))
+  .pipe(gulp.dest('dist/sw/'))
+);
+
+gulp.task('copy-sw:prod', () => 
+  gulp.src([
+    'node_modules/workbox-sw/build/importScripts/workbox-sw.prod.*.js'
+  ])
+  .pipe(gulp.dest('dist/sw/'))
+);
 
 
 // =============================================================================
-// TASK: generate-service-worker
+// TASK: generate-sw 
 // DESC: Generate a service worker file that will provide offline functionality 
 //        for local resources. 
 // INFO: See `html5rocks.com/en/tutorials/service-worker/introduction/` for
 //        an in-depth explanation of what service workers are and why use them.
 // =============================================================================
-gulp.task('generate-service-worker', ['copy-sw-scripts'], () => {
-  const rootDir = 'dist';
-  const filepath = path.join(rootDir, 'service-worker.js');
-  const pkgName = require('./package.json').name;
+gulp.task('generate-sw', () => 
+  workboxBuild.injectManifest({
+    swSrc: `app/service-worker.js`,
+    swDest: `dist/service-worker.js`,
+    globDirectory: `dist`,
+    // Add/remove glob patterns to match your directory setup.
+    globPatterns: [
+      `images/**/*`,
+      `scripts/**/*.js`,
+      `styles/**/*.css`,
+      `*.{html,json}`
+    ],
+    modifyUrlPrefix: {
+      'dist/': ''
+    }
+  })
+);
 
-  return swPrecache.write(filepath, {
-    // Used to avoid cache conflicts when serving on localhost.
-    cacheId: pkgName,
-    // sw-toolbox.js needs to be listed first. It sets up methods used in runtime-caching.js.
-    importScripts: [
-      'scripts/sw/sw-toolbox.js',
-      'scripts/sw/runtime-caching.js'
+
+// =============================================================================
+// TASK: sw
+// DESC: Use the production Service Worker
+// =============================================================================
+gulp.task('sw', () => {
+  const globResults = glob.sync('node_modules/workbox-sw/build/importScripts/workbox-sw.prod.*.js');
+
+  if (globResults.length !== 1) {
+    throw new Error('Unable to find the workbox-sw production file.');
+  }
+  return replace({
+    regex: 'workbox-sw.dev.js',
+    replacement: path.basename(globResults[0]),
+    paths: [
+      'dist/service-worker.js'
     ],
-    staticFileGlobs: [
-      // Add/remove glob patterns to match your directory setup.
-      rootDir+"/images/**/*",
-      rootDir+"/scripts/**/*.js",
-      rootDir+"/styles/**/*.css",
-      rootDir+"/**/*.{html,json}"
-    ],
-    // Translates a static file path to the relative URL that it's served from.
-    // This is '/' rather than path.sep because the paths returned from
-    // glob always use '/'.
-    stripPrefix: rootDir + '/'
+    recursive: true,
+    silent: true
   });
+});
+
+
+// =============================================================================
+// TASK: build :dev :prod
+// DESC: Build site (dev version has no SW)
+// =============================================================================
+gulp.task('build:prod', ['clean'], cb => {
+  production = true;
+  return runSequence(
+    ['styles'],
+    ['favicon','lint', 'scripts', 'images', 'copy'],
+    'html',
+    ['copy-sw:prod','generate-sw'],
+    'sw',
+    cb
+  );
+});
+
+
+gulp.task('build:dev', ['clean'], cb => {
+  production = false;
+  return runSequence(
+    'styles',
+    ['lint', 'html', 'scripts', 'images', 'copy'],
+    // In development, loading the SW might cause caching headaches
+    ['copy-sw:dev'],
+    cb
+  );
 });
 
 
@@ -334,7 +374,7 @@ gulp.task('generate-service-worker', ['copy-sw-scripts'], () => {
 // TASK: default
 // DESC: Run `gulp` for building production site.
 // =============================================================================
-gulp.task('default', ['production']);
+gulp.task('default', ['build:prod']);
 
 
 // =============================================================================
