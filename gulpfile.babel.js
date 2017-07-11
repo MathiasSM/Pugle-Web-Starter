@@ -47,7 +47,7 @@ gulp.task('lint', () =>
 // DESC: Resize and optimize images
 // =============================================================================
 gulp.task('images', () => {
-  let responsiveConfig = require('./app/responsive.config.js');
+  let responsiveConfig = require('./app/config/responsive.config.js');
   gulp.src([                        // SRC: Everything in 'images'
     'app/images/**',
   ],{nodir: true })
@@ -131,7 +131,7 @@ gulp.task('scripts', () =>
 // =============================================================================
 gulp.task('html', () => {
   let siteinfo = require('./app/siteinfo.json');
-  let htmlminConfig = require('./app/htmlmin.config.js');
+  let htmlminConfig = require('./app/config/htmlmin.config.js');
   let favicons = production ? fs.readFileSync('./.tmp/favicon.html') : "";
   return gulp.src([               // SRC: Every Pug file not in root or templates
     'app/**/*.pug',             
@@ -169,9 +169,10 @@ gulp.task('html', () => {
         /<\/head>/,
         favicons+"</head>")
   ))
-  .pipe($.save('html'))             // PIPE: Save Pipe for later use
-    .pipe($.sitemap({                 // PIPE: Generate sitemap
-      siteUrl: 'https://example.com'
+  .pipe($.save('html'))           // PIPE: Save Pipe for later use
+    .pipe($.sitemap({               // PIPE: Generate sitemap
+      siteUrl: 'https://example.com',
+      lastmod: (file) => new Date(file.stat.mtime)
     }))   
     .pipe(gulp.dest('./dist'))      // PIPE: Save sitemap to 'dist'
   .pipe($.save.restore('html'))     // PIPE: Restore old Pipe
@@ -188,35 +189,15 @@ gulp.task('html', () => {
 // DESC: Generates favicons.
 // =============================================================================
 gulp.task('favicon', () => {
+  let config =  require('./app/config/favicon.config.js');
   return gulp.src("app/favicon.png")          // SRC: Source favicon image
-  .pipe($.favicons({                          // PIPE: Generate Favicons
-    appName: "My App",
-    appDescription: "This is my application",
-    developerName: "Jane Dow",
-    developerURL: "https://example.com/",
-    background: "#ffffff",
-    theme_color: "#247cbf",
-    lang: "en-US",
-    path: "/",
-    url: "https://example.com/",
-    display: "standalone",
-    orientation: "portrait",
-    start_url: "/",
-    version: 1.0,
-    html: '../.tmp/favicon.html',
-    logging: false,
-    online: false,
-    pipeHTML: true,
-    replace: true,
-    logging:false,
-    icons: {
-      appleStartup: { offset:25},
-      appleIcon: { offset:10},
-      android: { shadow: true}
-    }
-  }))
+  .pipe($.favicons(config))                   // PIPE: Generate Favicons
   .pipe(gulp.dest("dist"))                    // PIPE: Save to 'dist'
-  .pipe($.size({title: 'favicons'}));          // PIPE: Report file size
+  .pipe($.imagemin({                          // PIPE: Optimize all images
+    progressive: true,
+    interlaced: true
+  }))
+  .pipe($.size({title: 'favicons'}))          // PIPE: Report file size
 });
 
 
@@ -274,70 +255,34 @@ gulp.task('pagespeed', cb => {
 
 
 // =============================================================================
-// TASK: serviceworker :dev :prod
-// DESC: Copy over the scripts 
-// =============================================================================
-gulp.task('copy-sw:dev', () => 
-  gulp.src([
-    'node_modules/workbox-sw/build/importScripts/workbox-sw.dev.*.js'
-  ])
-  .pipe($.rename('workbox-sw.dev.js'))
-  .pipe(gulp.dest('dist/sw/'))
-);
-
-gulp.task('copy-sw:prod', () => 
-  gulp.src([
-    'node_modules/workbox-sw/build/importScripts/workbox-sw.prod.*.js'
-  ])
-  .pipe(gulp.dest('dist/sw/'))
-);
-
-
-// =============================================================================
 // TASK: generate-sw 
 // DESC: Generate a service worker file that will provide offline functionality 
 //        for local resources. 
 // INFO: See `html5rocks.com/en/tutorials/service-worker/introduction/` for
 //        an in-depth explanation of what service workers are and why use them.
 // =============================================================================
-gulp.task('generate-sw', () => 
-  workboxBuild.injectManifest({
-    swSrc: `app/service-worker.js`,
-    swDest: `dist/service-worker.js`,
-    globDirectory: `dist`,
+gulp.task('generate-sw', () => {
+  return workboxBuild.generateSW({
+    cacheId: 'puggle-web-starter',
+    swDest: 'dist/sw.js',
+    globDirectory: 'dist',
     // Add/remove glob patterns to match your directory setup.
     globPatterns: [
-      `images/**/*`,
-      `scripts/**/*.js`,
-      `styles/**/*.css`,
-      `*.{html,json}`
+      'images/**/*',
+      'scripts/**/*.js',
+      'styles/**/*.css',
+      '**.{html,json}'
     ],
     modifyUrlPrefix: {
       'dist/': ''
     }
   })
-);
-
-
-// =============================================================================
-// TASK: sw
-// DESC: Use the production Service Worker
-// =============================================================================
-gulp.task('sw', () => {
-  const globResults = glob.sync('node_modules/workbox-sw/build/importScripts/workbox-sw.prod.*.js');
-
-  if (globResults.length !== 1) {
-    throw new Error('Unable to find the workbox-sw production file.');
-  }
-  return replace({
-    regex: 'workbox-sw.dev.js',
-    replacement: path.basename(globResults[0]),
-    paths: [
-      'dist/service-worker.js'
-    ],
-    recursive: true,
-    silent: true
-  });
+  .then(() => {
+    return gulp.src('dist/sw.js')
+    .pipe($.babel())
+    .pipe($.uglify({output:{comments:false}}))
+    .pipe(gulp.dest('dist'))
+  })
 });
 
 
@@ -351,8 +296,7 @@ gulp.task('build:prod', ['clean'], cb => {
     ['styles'],
     ['favicon','lint', 'scripts', 'images', 'copy'],
     'html',
-    ['copy-sw:prod','generate-sw'],
-    'sw',
+    'generate-sw',
     cb
   );
 });
@@ -364,7 +308,6 @@ gulp.task('build:dev', ['clean'], cb => {
     'styles',
     ['lint', 'html', 'scripts', 'images', 'copy'],
     // In development, loading the SW might cause caching headaches
-    ['copy-sw:dev'],
     cb
   );
 });
