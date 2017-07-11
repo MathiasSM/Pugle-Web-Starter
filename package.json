@@ -48,8 +48,8 @@
   },
   "scripts": {
     "build": "gulp",
-    "build:production": "gulp production",
-    "build:development": "gulp development",
+    "build:production": "gulp build:prod",
+    "build:development": "gulp build:dev",
     "start": "npm run server",
     "server": "gulp serve"
   },
