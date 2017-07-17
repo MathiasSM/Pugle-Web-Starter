@@ -135,7 +135,6 @@ gulp.task('scripts', () =>
 // =============================================================================
 gulp.task('html', () => {
   let htmlminConfig = require('./app/config/htmlmin.config.js');
-  let gitlogConfig = require('./app/config/gitlog.config.js');
   let favicons = production ? fs.readFileSync('./.tmp/favicon.html') : "";
   return gulp.src([               // SRC: Every Pug file not in root or templates
     'app/**/*.pug',             
