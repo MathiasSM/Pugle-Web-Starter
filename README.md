@@ -1,4 +1,4 @@
-# [Pugle Web Starter](https://github.com/MathiasSM/Pugle-Web-Starter/releases/latest)
+# Pugle Web Starter
 
 [![Build Status](https://travis-ci.org/MathiasSM/Pugle-Web-Starter.svg?branch=master)](https://travis-ci.org/MathiasSM/Pugle-Web-Starter)
 
