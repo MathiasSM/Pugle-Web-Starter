@@ -2,6 +2,10 @@ sudo: false
 language: node_js
 node_js:
   - '8'
+  - '7'
+  - '6'
+  - '5'
+  - '4'
 script: npm run build
 env:
   - CXX=g++-4.8
@@ -9,8 +13,10 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - git-core
     packages:
     - g++-4.8
+    - git
 # Deploy to Github Pages (uncomment next lines)
 # deploy:
 #   local_dir: 'dist'
