@@ -1,6 +1,13 @@
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tempor dui id ex viverra luctus. Nulla ac elit enim. Etiam eu pellentesque arcu, finibus pulvinar ex. Nunc feugiat ipsum id mauris tincidunt, a ornare eros consequat. Sed tempor, arcu lacinia vehicula consectetur, dui mi tempus mauris, eu pulvinar velit lacus id elit. Ut in blandit augue. Maecenas lacus urna, ultricies iaculis magna eget, semper vehicula nisi. Curabitur vitae tristique velit. Aenean volutpat sapien nibh, ac sagittis turpis volutpat non. Suspendisse euismod placerat fermentum. Praesent neque velit, dignissim id dolor nec, aliquet viverra nisi. Sed iaculis arcu sed est faucibus varius. Suspendisse id erat ut ex rhoncus elementum sed quis massa. Phasellus imperdiet imperdiet arcu, et interdum sapien iaculis a. Suspendisse pellentesque sed felis eget ultrices.
 
-![/images/jason-blackeye-blur.jpg](/images/jason-blackeye-blur.jpg)
+<img srcset="/images/jason-blackeye-blur.jpg 30w,
+             /images/jason-blackeye-350px.jpg 350w,
+             /images/jason-blackeye-700px.jpg 700w,
+             /images/jason-blackeye-1400px.jpg 1400w,
+             /images/jason-blackeye-2800px.jpg 2800w,
+             /images/jason-blackeye-5600px.jpg 5600w"
+     src="/images/jason-blackeye-blur.jpg" alt="Photo by Jason Blackeye"
+     style="width:100%; height:auto;">
 
 Quisque commodo dui quis turpis varius luctus. Aliquam tristique pellentesque vehicula. Cras porttitor lectus in egestas euismod. Sed nec elit nec mauris rhoncus venenatis sed ut quam. Nullam aliquet luctus dignissim. Etiam eget sapien facilisis, viverra magna et, sodales urna. Vestibulum dictum diam auctor, semper lacus at, varius enim. Fusce porta risus at leo tempor, sit amet facilisis odio aliquam. Sed feugiat sed tellus vitae facilisis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Proin vitae pulvinar elit. In hac habitasse platea dictumst.
 
