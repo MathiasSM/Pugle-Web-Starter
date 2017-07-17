@@ -1,1 +1,10 @@
 extends templates/base.pug
+
+append body
+  main
+    section.about
+      h2 About this site
+      include:commonmark index.md
+    section.contact
+      h2 Get in touch now
+      include templates/contactForm.pug 

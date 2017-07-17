@@ -7,11 +7,9 @@
   
 /* THANKS */
 
-  Domain Name (1st Year): CodeChef's SnackDown 2017 Prize
-  Hosting (Starting): Github Pages
+  Git: Github 
 
 /* SITE */
 
-  Language: English, Español
+  Language: English
   Doctype: HTML5
-  UI: React.js

@@ -11,10 +11,11 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+# Deploy to Github Pages (uncomment next lines)
 # deploy:
 #   local_dir: 'dist'
 #   provider: pages
 #   skip_cleanup: true
-#   github_token: $GITHUB_TOKEN
+#   github_token: $GITHUB_TOKEN     # And set GITHUB_TOKEN in Travis dashboard
 #   on:
 #     branch: master

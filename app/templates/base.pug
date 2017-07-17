@@ -3,6 +3,7 @@
 html(lang=lang.replace(/_.*$/,""))
   head
     //- Required meta tags (best practices)
+    meta(http-equiv="X-UA-Compatible" content="IE=edge")
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1")
 
@@ -10,21 +11,24 @@ html(lang=lang.replace(/_.*$/,""))
     block head
       
       //- Title and description
-      - let title = (page.title ? page.title : "") + (siteinfo.info || "My Site");
+      - let title = (page.title ? page.title + " - " : "")  + (siteinfo.name || "Camila San Miguel");
       - let desc = page.description || siteinfo.description || "";
-      title #{title}
-      meta(name="description" content=desc)
+      block usual
+        title #{title}
+        meta(name="description" content=desc)
 
       //- Author and copyright information
       - let author = page.author || siteinfo.author
-      - let copyright = page.copyright || siteinfo.copyright
-      if author
-        meta(name="author" content=author)
-      if copyright
+      - let copyright = page.copyright || author
+      meta(name="author" content=author)
       meta(name="copyright" content=copyright)
 
+      block styles
+        link(rel="stylesheet" href="/styles/main.css")
+        link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,400i,700|Montserrat:200,400")
 
-      - let url = page.url || ""
+        
+      - let url = page.url || "/"
       - let mainImage = page.mainImage || siteinfo.mainImage || ""
       //- OPENGRAPH Tags (Facebook: https://developers.facebook.com/docs/sharing/webmasters)
       meta(property="og:locale" content=lang)
@@ -38,19 +42,28 @@ html(lang=lang.replace(/_.*$/,""))
 
 
       //- TWITTER Tags (Twitter: https://dev.twitter.com/cards/types/summary-large-image)
-      meta(property="twitter:card" content="summary_large_image")
       block twitter
         - let twitterUser = page.twitter || "";
         - let twitterSite = siteinfo.twitter || "";
+        meta(property="twitter:card" content="summary_large_image")
         meta(property="twitter:site" content=twitterSite)
         meta(property="twitter:creator" content=twitterUser)
         meta(property="twitter:title" content=page.title)
         meta(property="twitter:description" content=desc)
         meta(property="twitter:image" content=mainImage)
 
+      block scripts
 
-  body(class={home: page.home === true })
+  body
     block body
+    footer.footer
+      //- .search
+      //-   input(placeholder="Search")
+      .copyright
+        - var notice = "Copyright © "+(new Date().getFullYear())
+        span #{notice}
+
+    script(src="/scripts/main.min.js")
     script
       include google-analytics.js
       block scripts

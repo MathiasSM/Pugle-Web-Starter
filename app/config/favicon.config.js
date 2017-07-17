@@ -1,7 +1,7 @@
 module.exports = { 
     appName: "My App",
     appDescription: "This is my application",
-    developerName: "Jane Dow",
+    developerName: "Jane Doe",
     developerURL: "https://example.com/",
     background: "#ffffff",
     theme_color: "#247cbf",

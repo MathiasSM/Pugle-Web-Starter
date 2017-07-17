@@ -36,7 +36,7 @@
     "gulp-uglify": "^3.0.0",
     "gulp-useref": "^3.1.2",
     "gulp-util": "^3.0.8",
-    "jstransformer-markdown-it": "^2.0.0",
+    "jstransformer-commonmark": "^0.3.1",
     "psi": "^3.0.0",
     "replace": "^0.3.0",
     "run-sequence": "^2.0.0",
@@ -47,9 +47,9 @@
     "node": ">=4"
   },
   "scripts": {
-    "build": "gulp",
-    "build:production": "gulp build:prod",
-    "build:development": "gulp build:dev",
+    "build": "npm run build:prod",
+    "build:prod": "gulp build:prod",
+    "build:dev": "gulp build:dev",
     "start": "npm run server",
     "server": "gulp serve"
   },
@@ -68,5 +68,6 @@
   },
   "license": "Apache-2.0",
   "version": "0.8.0",
-  "name": "pugle-web-starter"
+  "name": "pugle-web-starter",
+  "repository": "MathiasSM/Pugle-Web-Starter"
 }

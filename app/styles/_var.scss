@@ -1,0 +1,37 @@
+// FONTS =======================================================================
+$font-h: 'Montserrat', sans-serif;
+$font-h-light: 200;
+$font-h-normal: 400;
+
+$font-p: 'Lora', serif;
+$font-p-normal: 400;
+$font-p-bold: 700;
+
+
+// COLORS ======================================================================
+
+$color-primary: #247cbf;
+$color-secondary: #cb6827;
+
+$color-text: #333;
+$color-text-light: #777;
+
+$color-light: #ddd;
+$color-bg: #fff;
+
+$color-success: #207F20;
+$color-warning: #ffbf10;
+$color-failure: #FF1010;
+
+
+// OTHERS ======================================================================
+$border-width: .15rem;
+$border-radius: 5px;
+
+$linesize: 560px;
+
+$breakpoints: (
+  'phone': 320px,
+  'tablet': 768px,
+  'desktop': 1024px
+);

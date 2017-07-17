@@ -1,0 +1,14 @@
+form.contactForm
+  .info
+    label(for="input-name") Your Name
+    input( id="input-name" type="text"   name="name"   placeholder="John Doe"              pattern=".{5,}" maxlength="70" required)
+    
+    label(for="input-email") Your Email
+    input( id="input-email" type="email"  name="email"  placeholder="john.doe@example.com" pattern=".{5,}" maxlength="70" required)
+  
+  .msg
+    label(  for="input-message") Your Message
+    textarea(id="input-message" name="message"   placeholder="I'd like to..." rows="5" required pattern=".{15,}")
+  
+  .send
+    button(type="submit") Contact Camila
